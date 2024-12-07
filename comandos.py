@@ -99,7 +99,7 @@ def rango(g,n, inicio, orden=None):
 def ciclo_n_canciones(grafo, n, cancion_origen):
     ciclo = ciclo_particular_dfs(grafo, cancion_origen, n)
     if not ciclo:
-        print("No se encontró recorrido")
+        print("No se encontro recorrido")
         return
     printear_ciclo(ciclo)
 
