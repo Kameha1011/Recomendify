@@ -37,8 +37,6 @@ def printear_camino(g, camino):
             print(f"donde aparece", end=FLECHA)
     
     print(camino[-1])
-    
-'''---------------------------------------------------------------------------------------------------'''
 
 '''------------------------------------------------Mas Importantes----------------------------------------------------'''
 
@@ -62,7 +60,6 @@ def pagerank(g, iteraciones = CANTIDAD_ITERACIONES, d=FACTOR_AMORTIGUACION):
             for w in adyacentes:
                 sumatoria += pr[w]/len(g.adyacentes(w))
             nuevo_pr[v] = acceso_aleatorio + (d*sumatoria)
-        
         pr = nuevo_pr
 
     return pr
@@ -86,10 +83,6 @@ def mas_importantes(n, g, conjuntos):
 
     printer(canciones_mas_importantes, SEPARADOR_ELEMENTOS)
     
-    
-    
-
-'''---------------------------------------------------------------------------------------------------'''
 
 '''----------------------------------------------------Rango----------------------------------------------------'''
 
