@@ -3,6 +3,8 @@ import random
 from modelos import *
 from auxiliares import printer, obtener_vertice_cancion
 
+SEPARADOR_ELEMENTOS = " ;"
+
 '''----------------------------------------------------CAMINO-----------------------------------------------------------------'''
 
 FLECHA = " --> "
@@ -22,8 +24,8 @@ def camino_minimo(g, inicio, fin):
 def printear_camino(g, camino):
     for i in range(len(camino) - 1):
         playlist = g.peso_arista(camino[i], camino[i+1])
-        nombre_playlist = playlist[random.randint(0, len(playlist) - 1)].nombre
-        if i%2 == 0:
+        nombre_playlist = random.choice(list(playlist.playlists.values()))
+        if camino[i].tipo == CANCION:
             print(f"{camino[i]}", end=FLECHA)
             print("aparece en playlist", end=FLECHA)
             print(f"{nombre_playlist}", end=FLECHA)
@@ -41,8 +43,10 @@ def printear_camino(g, camino):
 '''------------------------------------------------Mas Importantes----------------------------------------------------'''
 
 page_rank = {}
+CANTIDAD_ITERACIONES = 100
+FACTOR_AMORTIGUACION = 0.85
 
-def pagerank(g, iteraciones = 100, d=0.85):
+def pagerank(g, iteraciones = CANTIDAD_ITERACIONES, d=FACTOR_AMORTIGUACION):
     pr = {}
     n = len(g)
     acceso_aleatorio = (1-d) / n
@@ -78,9 +82,9 @@ def mas_importantes(n, g):
         page_rank = list(page_rank.items())
         page_rank.sort(key=lambda x: x[1], reverse=True)
 
-    canciones_mas_importantes = [cancion for cancion, _ in page_rank[:n]]
+    canciones_mas_importantes = [cancion for cancion, _ in page_rank[:n+1]]
 
-    printer(canciones_mas_importantes, " ; ")
+    printer(canciones_mas_importantes, SEPARADOR_ELEMENTOS)
     
     
     
@@ -110,8 +114,10 @@ def ciclo_n_canciones(grafo, n, cancion_origen):
 
 '''----------------------------------------------------Page Rank Personalizado----------------------------------------------'''
 
-GRADO = 0
-
+VERTICE = 0
+PESO = 1
+VALOR_INICIAL_PAGE_RANK = 1
+LARGO_CAMINO = 300
 
 def random_walk(g, v, largo_camino, grados, page_rank_pers):
     if largo_camino == 0:
@@ -120,32 +126,26 @@ def random_walk(g, v, largo_camino, grados, page_rank_pers):
     cant_adyacentes = len(adyacentes)
     if cant_adyacentes == 0:
         return
-    w = adyacentes[random.randint(0, cant_adyacentes - 1)]
+    w = random.choice(list(adyacentes.keys()))
     if w in page_rank_pers:
         page_rank_pers[w] += (page_rank_pers[v]/grados[v])
     else:
         page_rank_pers[w] = (page_rank_pers[v]/grados[v])
     random_walk(g, w, largo_camino - 1, grados, page_rank_pers)
 
-def obtener_page_rank_personalizado(g, largo_camino, grados, inicio):
-    page_rank_personalizado = {inicio : 1}
+def obtener_page_rank_personalizado_cancion(g, largo_camino, grados, inicio):
+    page_rank_personalizado = {inicio : VALOR_INICIAL_PAGE_RANK}
 
-    for _ in range(100):
+    for _ in range(CANTIDAD_ITERACIONES):
         random_walk(g, inicio, largo_camino, grados, page_rank_personalizado)
-    for v in g:
-        if v not in page_rank_personalizado:
-            page_rank_personalizado[v] = 0
-        else:
-            page_rank_personalizado[v] /= 100
+    
+    for v in page_rank_personalizado:
+        page_rank_personalizado[v] /= CANTIDAD_ITERACIONES
 
     return page_rank_personalizado
 
 
-PESO = 1
-VERTICE = 0
-
-
-def filtro(page_rank, condicion, elemento):
+def filtrar_page_rank_personalizado(page_rank, condicion, elemento):
     page_rank_filtrado = {}
 
     for clave in page_rank:
@@ -156,40 +156,41 @@ def filtro(page_rank, condicion, elemento):
 
     return page_rank_filtrado
 
-def pr_promediado(prs):
-    pr_promedio = {}
-    for pr in prs:
-        for clave in pr:
-            if clave in pr_promedio:
-                pr_promedio[clave] += pr[clave]
-            else:
-                pr_promedio[clave] = pr[clave]
-    return pr_promedio
-
-
-def promedio(page_ranks, k):
+def unificar_page_ranks(page_ranks):
+    page_rank_unificado = {}
     for pr in page_ranks:
         for clave in pr:
-            pr[clave] /= k
+            if clave in page_rank_unificado:
+                page_rank_unificado[clave] += pr[clave]
+            else:
+                page_rank_unificado[clave] = pr[clave]
+    return page_rank_unificado
+
+def ordenar_page_rank(page_rank):
+    page_rank = list(page_rank.items())
+    page_rank.sort(key=lambda x: x[PESO], reverse=True)
+    return page_rank
+
+def promediar_page_rank(page_rank, factor):
+    for clave in page_rank:
+        page_rank[clave] /= factor
 
 def recomendados(g, lista_canciones, n_recomendados, condicion):
     grados = obtener_grados(g)
-    personalizados = []
+    page_ranks_personalizados = []
     for cancion in lista_canciones:
-        pr_pers = obtener_page_rank_personalizado(g, 300, grados, cancion)
-        pr_pers = filtro(pr_pers, condicion, cancion)
-        personalizados.append(pr_pers)
+        cancion = obtener_vertice_cancion(cancion)
+        pr_pers = obtener_page_rank_personalizado_cancion(g, LARGO_CAMINO, grados, cancion)
+        pr_pers = filtrar_page_rank_personalizado(pr_pers, condicion, cancion)
+        page_ranks_personalizados.append(pr_pers)
     
-    promedio(personalizados, len(personalizados))
-    pr_promedio = pr_promediado(personalizados)
-    pr_promedio = list(pr_promedio.items())
-    pr_promedio.sort(key=lambda x: x[PESO], reverse=True)
+    pr_unificado = unificar_page_ranks(page_ranks_personalizados)
+    promediar_page_rank(pr_unificado, len(page_ranks_personalizados))
+    pr_unificado_ordenado = ordenar_page_rank(pr_unificado)
 
-    recomendados = []
-    for i in range(n_recomendados):
-        recomendados.append(pr_promedio[i][VERTICE])
+    recomendados = [elem for elem, _ in pr_unificado_ordenado[:n_recomendados + 1]]
     
-    printer(recomendados, " ; ")
+    printer(recomendados, SEPARADOR_ELEMENTOS)
 
 
 '''---------------------------------------------------------------------------------------------------'''
