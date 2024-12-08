@@ -2,7 +2,7 @@ from funciones_grafo import bfs, reconstruir_camino, encontrar_ciclo_largo_n, ob
 import random
 from auxiliares import printer
 
-SEPARADOR_ELEMENTOS = " ;"
+SEPARADOR_ELEMENTOS = ";"
 CANCION = 1
 
 
@@ -103,6 +103,7 @@ def ciclo_n_canciones(grafo, n, cancion_origen):
         print("No se encontro recorrido")
         return
     printer(ciclo, FLECHA)
+    print(ciclo[0])
 
 
 '''----------------------------------------------------Page Rank Personalizado----------------------------------------------'''
@@ -132,6 +133,7 @@ def obtener_page_rank_personalizado_cancion(g, largo_camino, grados, inicio):
     for _ in range(CANTIDAD_ITERACIONES):
         random_walk(g, inicio, largo_camino, grados, page_rank_personalizado)
     
+
     for v in page_rank_personalizado:
         page_rank_personalizado[v] /= CANTIDAD_ITERACIONES
 
@@ -144,7 +146,7 @@ def filtrar_page_rank_personalizado(page_rank, condicion, elemento, conjuntos):
     for clave in page_rank:
         if clave == elemento:
             continue
-        if conjuntos[clave] == condicion:
+        if conjuntos[clave] != condicion:
             page_rank_filtrado[clave] = page_rank[clave]
 
     return page_rank_filtrado
@@ -181,7 +183,6 @@ def recomendados(g, lista_canciones, n_recomendados, condicion, conjuntos):
     pr_unificado_ordenado = ordenar_page_rank(pr_unificado)
 
     recomendados = [elem for elem, _ in pr_unificado_ordenado[:n_recomendados + 1]]
-    
     printer(recomendados, SEPARADOR_ELEMENTOS)
 
 
