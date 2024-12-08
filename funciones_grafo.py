@@ -62,9 +62,3 @@ def _encontrar_ciclo_wrapper(grafo,v,vertice_origen, visitados, padres, longitud
                 return ciclo
     visitados.remove(v)
     return None
-
-def separar_conjuntos(g):
-    conjuntos = {}
-    for v in g:
-        conjuntos[v.nombre()] = v.tipo
-    return conjuntos

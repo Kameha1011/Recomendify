@@ -1,25 +1,28 @@
 from funciones_grafo import bfs, reconstruir_camino, encontrar_ciclo_largo_n, obtener_grados
 import random
-from modelos import CANCION, USUARIO
+from modelos import *
+from auxiliares import obtener_vertice_cancion
 
 '''----------------------------------------------------CAMINO-----------------------------------------------------------------'''
 
 FLECHA = " --> "
 
-def camino_minimo(g, inicio, fin, conjuntos):
-    if conjuntos[inicio] == CANCION and conjuntos[fin] == CANCION:
+def camino_minimo(g, inicio, fin):
+    vertice_inicio = obtener_vertice_cancion(inicio)
+    vertice_fin = obtener_vertice_cancion(fin)
+    if  not vertice_inicio or not vertice_fin:
         print("Tanto el origen como el destino deben ser canciones")
         return
-    orden, padres = bfs(g, inicio, fin)
-    if fin not in orden:
+    orden, padres = bfs(g, vertice_inicio, vertice_fin)
+    if vertice_fin not in orden:
         print("No se encontro recorrido")
         return
-    printear_camino(g, reconstruir_camino(padres, inicio, fin))
+    printear_camino(g, reconstruir_camino(padres, vertice_inicio, vertice_fin))
     
 def printear_camino(g, camino):
     for i in range(len(camino) - 1):
         playlist = g.peso_arista(camino[i], camino[i+1])
-        nombre_playlist = random.choice(list(playlist.values()))
+        nombre_playlist = random.choice(list(playlist.playlists.values()))
         if i%2 == 0:
             print(f"{camino[i]}", end=FLECHA)
             print("aparece en playlist", end=FLECHA)
