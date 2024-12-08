@@ -8,6 +8,7 @@ ID_PLAYLIST = 4
 NOMBRE_PLAYLIST = 5
 GENEROS = 6
 SEPARADOR = " - "
+SEPARADOR_ELEMENTOS = ";"
 
 def parsear_linea(linea : str):
     datos = linea.rstrip("\n").split("\t")
@@ -54,3 +55,7 @@ def obtener_grafo_proyeccion(g):
                     grafo_proyeccion.agregar_arista(canciones[i], canciones[j])
     return grafo_proyeccion
 
+def printer(elementos, separador):
+    for i in range(len(elementos) - 2):
+            print(f" {elementos[i]}", end=separador)
+    print(f" {elementos[-1]}")

@@ -1,7 +1,7 @@
 from collections import deque
 from grafo import *
 
-def bfs(g:  Grafo, inicio, destino=None):
+def bfs(g:  Grafo, inicio, destino=None, corte= None):
     padres = {inicio : None}
     orden = {inicio: 0}
     visitados = set()
@@ -18,6 +18,8 @@ def bfs(g:  Grafo, inicio, destino=None):
                 visitados.add(w)
                 padres[w] = v
                 orden[w] = orden[v] + 1
+                if corte and orden[w] > corte:
+                    continue
                 cola.append(w)
     return orden, padres
 
