@@ -55,6 +55,13 @@ def obtener_grafo_proyeccion(g):
                     grafo_proyeccion.agregar_arista(canciones[i], canciones[j])
     return grafo_proyeccion
 
+
+def obtener_vertice_cancion(datos):
+    elem = datos.split(SEPARADOR)
+    if len(elem) < 2:
+        return None
+    return Cancion(elem[0], elem[1])
+
 def printer(elementos, separador):
     for i in range(len(elementos) - 2):
             print(f" {elementos[i]}", end=separador)

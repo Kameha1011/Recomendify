@@ -21,7 +21,7 @@ class Vertice:
 
 class Cancion(Vertice):
     def __init__(self, nombre_cancion,nombre_artista):
-        super().__init__(f"{self.nombre_cancion} - {self.nombre_artista}")
+        super().__init__(f"{nombre_cancion} - {nombre_artista}")
         self.nombre_cancion = nombre_cancion
         self.nombre_artista = nombre_artista
         self.tipo = CANCION

@@ -13,10 +13,8 @@ def main():
     archivo = open("spotify-mini.tsv", "r")
     grafo_bipartito = construir_grafo_bipartito(archivo)
     archivo.close()
-    conjuntos = separar_conjuntos(grafo_bipartito)
-    for v in conjuntos.items():
 
-    # comandos.camino_minimo(grafo_bipartito, "Don't Go Away - Oasis", "Quitter - Eminem", conjuntos)
+    comandos.camino_minimo(grafo_bipartito, "Don't Go Away - Oasis", "Quitter - Eminem")
     # for linea in sys.stdin:
     #     linea = linea.split()
     #     comando = linea[0]
