@@ -1,12 +1,13 @@
-from funciones_grafo import bfs, reconstruir_camino, ciclo_particular_dfs, obtener_grados
+from funciones_grafo import bfs, reconstruir_camino, encontrar_ciclo_largo_n, obtener_grados
 import random
+from modelos import CANCION, USUARIO
 
 '''----------------------------------------------------CAMINO-----------------------------------------------------------------'''
 
 FLECHA = " --> "
 
-def camino_minimo(g, inicio, fin, colores):
-    if colores[inicio] == 0 or colores[fin] == 0:
+def camino_minimo(g, inicio, fin, conjuntos):
+    if conjuntos[inicio] == CANCION and conjuntos[fin] == CANCION:
         print("Tanto el origen como el destino deben ser canciones")
         return
     orden, padres = bfs(g, inicio, fin)
@@ -97,7 +98,7 @@ def rango(g,n, inicio, orden=None):
 
 
 def ciclo_n_canciones(grafo, n, cancion_origen):
-    ciclo = ciclo_particular_dfs(grafo, cancion_origen, n)
+    ciclo = encontrar_ciclo_largo_n(grafo, cancion_origen, n)
     if not ciclo:
         print("No se encontro recorrido")
         return
@@ -186,7 +187,7 @@ def recomendados(g, lista_canciones, n_recomendados, colores, condicion):
     pr_promedio = list(pr_promedio.items())
     pr_promedio.sort(key=lambda x: x[PESO], reverse=True)
 
-    for i in range(n_recomendados - 2):
+    for i in range(n_recomendados - 1):
         print(f"{pr_promedio[i][VERTICE]}", end=" ; ")
     print(pr_promedio[n_recomendados - 1][VERTICE])
 
