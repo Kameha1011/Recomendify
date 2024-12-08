@@ -1,7 +1,6 @@
 from funciones_grafo import bfs, reconstruir_camino, encontrar_ciclo_largo_n, obtener_grados
 import random
-from modelos import *
-from auxiliares import printer, obtener_vertice_cancion
+from auxiliares import printer
 
 SEPARADOR_ELEMENTOS = " ;"
 
@@ -9,23 +8,22 @@ SEPARADOR_ELEMENTOS = " ;"
 
 FLECHA = " --> "
 
-def camino_minimo(g, inicio, fin):
-    vertice_inicio = obtener_vertice_cancion(inicio)
-    vertice_fin = obtener_vertice_cancion(fin)
-    if  not vertice_inicio or not vertice_fin:
+def camino_minimo(g, inicio, fin, conjuntos):
+    if conjuntos[inicio] != CANCION or conjuntos[fin] != CANCION:
         print("Tanto el origen como el destino deben ser canciones")
         return
-    orden, padres = bfs(g, vertice_inicio, vertice_fin)
-    if vertice_fin not in orden:
+
+    orden, padres = bfs(g, inicio, fin)
+    if fin not in orden:
         print("No se encontro recorrido")
         return
-    printear_camino(g, reconstruir_camino(padres, vertice_inicio, vertice_fin))
+    printear_camino(g, reconstruir_camino(padres, inicio, fin))
     
 def printear_camino(g, camino):
     for i in range(len(camino) - 1):
         playlist = g.peso_arista(camino[i], camino[i+1])
-        nombre_playlist = random.choice(list(playlist.playlists.values()))
-        if camino[i].tipo == CANCION:
+        nombre_playlist = random.choice(list(playlist.values()))
+        if i % 2 == 0:
             print(f"{camino[i]}", end=FLECHA)
             print("aparece en playlist", end=FLECHA)
             print(f"{nombre_playlist}", end=FLECHA)
@@ -67,18 +65,18 @@ def pagerank(g, iteraciones = CANTIDAD_ITERACIONES, d=FACTOR_AMORTIGUACION):
 
     return pr
 
-def filtro_mas_importantes(diccionario):
+def filtro_mas_importantes(diccionario, conjuntos):
     nuevo = {}
     for clave in diccionario:
-        if clave.tipo == CANCION:
+        if conjuntos[clave] == CANCION:
             nuevo[clave] = diccionario[clave]
     return nuevo
 
-def mas_importantes(n, g):
+def mas_importantes(n, g, conjuntos):
     global page_rank
     if len(page_rank) == 0:
         page_rank = pagerank(g)
-        page_rank = filtro_mas_importantes(page_rank)
+        page_rank = filtro_mas_importantes(page_rank, conjuntos)
         page_rank = list(page_rank.items())
         page_rank.sort(key=lambda x: x[1], reverse=True)
 
@@ -93,7 +91,7 @@ def mas_importantes(n, g):
 
 '''----------------------------------------------------Rango----------------------------------------------------'''
 
-def rango(g,n, inicio, orden):
+def rango(g,n, inicio):
     orden, _ = bfs(g, inicio, corte=n)
     cont = 0
     for v in orden:
@@ -145,13 +143,13 @@ def obtener_page_rank_personalizado_cancion(g, largo_camino, grados, inicio):
     return page_rank_personalizado
 
 
-def filtrar_page_rank_personalizado(page_rank, condicion, elemento):
+def filtrar_page_rank_personalizado(page_rank, condicion, elemento, conjuntos):
     page_rank_filtrado = {}
 
     for clave in page_rank:
         if clave == elemento:
             continue
-        if clave.tipo == condicion:
+        if conjuntos[clave] == condicion:
             page_rank_filtrado[clave] = page_rank[clave]
 
     return page_rank_filtrado
@@ -175,13 +173,12 @@ def promediar_page_rank(page_rank, factor):
     for clave in page_rank:
         page_rank[clave] /= factor
 
-def recomendados(g, lista_canciones, n_recomendados, condicion):
+def recomendados(g, lista_canciones, n_recomendados, condicion, conjuntos):
     grados = obtener_grados(g)
     page_ranks_personalizados = []
     for cancion in lista_canciones:
-        cancion = obtener_vertice_cancion(cancion)
         pr_pers = obtener_page_rank_personalizado_cancion(g, LARGO_CAMINO, grados, cancion)
-        pr_pers = filtrar_page_rank_personalizado(pr_pers, condicion, cancion)
+        pr_pers = filtrar_page_rank_personalizado(pr_pers, condicion, cancion, conjuntos)
         page_ranks_personalizados.append(pr_pers)
     
     pr_unificado = unificar_page_ranks(page_ranks_personalizados)

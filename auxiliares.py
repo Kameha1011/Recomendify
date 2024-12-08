@@ -1,5 +1,4 @@
 from grafo import *
-from modelos import *
 
 ID_USUARIO = 1
 NOMBRE_CANCION = 2
@@ -9,6 +8,8 @@ NOMBRE_PLAYLIST = 5
 GENEROS = 6
 SEPARADOR = " - "
 SEPARADOR_ELEMENTOS = ";"
+USUARIO = 0
+CANCION = 1
 
 def parsear_linea(linea : str):
     datos = linea.rstrip("\n").split("\t")
@@ -16,37 +17,43 @@ def parsear_linea(linea : str):
     datos[GENEROS] = generos
     return datos
 
-def actualizar_grafo_bipartito(g : Grafo, datos):
-    vertice_usuario = Usuario(datos[ID_USUARIO])
-    vertice_cancion = Cancion(datos[NOMBRE_CANCION], datos[NOMBRE_ARTISTA])
+def actualizar_grafo_bipartito(g : Grafo, datos, conjuntos):
+    usuario = datos[ID_USUARIO]
+    conjuntos[usuario] = USUARIO
+    cancion = f"{datos[NOMBRE_CANCION]}{SEPARADOR}{datos[NOMBRE_ARTISTA]}"
+    conjuntos[cancion] = CANCION
 
-    if vertice_usuario not in g:
-        g.agregar_vertice(vertice_usuario)
-    if vertice_cancion not in g:
-        g.agregar_vertice(vertice_cancion)
+    if usuario not in g:
+        g.agregar_vertice(usuario)
+    if cancion not in g:
+        g.agregar_vertice(cancion)
 
-    if not g.estan_unidos(vertice_cancion, vertice_usuario):
-        playlist = Playlist_Usuario()
-        playlist.agregar_playlist(datos[NOMBRE_PLAYLIST], datos[ID_PLAYLIST])
-        g.agregar_arista(vertice_cancion, vertice_usuario, playlist)
+    id_playlist = datos[ID_PLAYLIST]
+    nombre_playlist = datos[NOMBRE_PLAYLIST]
+
+    if not g.estan_unidos(usuario, cancion):
+        uniones = {}
+        uniones[id_playlist] = nombre_playlist
+        g.agregar_arista(usuario, cancion, uniones)
     else:
-        playlist_actual = g.peso_arista(vertice_cancion, vertice_usuario)
-        playlist_actual.agregar_playlist(datos[NOMBRE_PLAYLIST], datos[ID_PLAYLIST])
+        uniones = g.peso_arista(usuario, cancion)
+        uniones[id_playlist] = nombre_playlist
 
 def construir_grafo_bipartito(archivo):
+    conjuntos = {}
     g = Grafo(dirigido=False)
     archivo.readline() # Skip nombres de columnas
     linea = archivo.readline()
     while linea:
         datos = parsear_linea(linea)
-        actualizar_grafo_bipartito(g, datos)
+        actualizar_grafo_bipartito(g, datos, conjuntos)
         linea = archivo.readline()
-    return g
+    return g, conjuntos
 
-def obtener_grafo_proyeccion(g):
+def obtener_grafo_proyeccion(g, conjunto):
     grafo_proyeccion = Grafo(False)
     for v in g:
-        if v.tipo == USUARIO:
+        if conjunto[v] == USUARIO:
             canciones = list(g.adyacentes(v))
             for i in range(len(canciones) - 1):
                 grafo_proyeccion.agregar_vertice(canciones[i])
@@ -54,13 +61,6 @@ def obtener_grafo_proyeccion(g):
                     grafo_proyeccion.agregar_vertice(canciones[j])
                     grafo_proyeccion.agregar_arista(canciones[i], canciones[j])
     return grafo_proyeccion
-
-
-def obtener_vertice_cancion(datos):
-    elem = datos.split(SEPARADOR)
-    if len(elem) < 2:
-        return None
-    return Cancion(elem[0], elem[1])
 
 def printer(elementos, separador):
     for i in range(len(elementos) - 2):

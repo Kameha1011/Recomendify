@@ -1,5 +1,3 @@
-CANCION = "Cancion"
-USUARIO = "Usuario"
 
 class Vertice:
     def __init__(self, nombre):
