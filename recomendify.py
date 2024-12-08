@@ -17,9 +17,6 @@ SEPARADOR = " >>>> "
 ESPACIO = " "
 CANCIONES = "canciones"
 
-CANCION = "Cancion"
-USUARIO = "Usuario"
-
 
 def main():
     grafo_proyeccion = None
@@ -33,7 +30,7 @@ def main():
         comando = linea[:primer_espacio]
         linea = linea[primer_espacio+1:]
 
-        if comando == CANCION:
+        if comando == CAMINO:
             cancion_inicio, cancion_fin = linea.split(SEPARADOR)
             comandos.camino_minimo(grafo_bipartito, cancion_inicio, cancion_fin, conjuntos)
 

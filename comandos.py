@@ -103,7 +103,6 @@ def ciclo_n_canciones(grafo, n, cancion_origen):
         print("No se encontro recorrido")
         return
     printer(ciclo, FLECHA)
-    print(ciclo[0])
 
 
 '''----------------------------------------------------Page Rank Personalizado----------------------------------------------'''
