@@ -3,6 +3,8 @@ import random
 from auxiliares import printer
 
 SEPARADOR_ELEMENTOS = " ;"
+CANCION = 1
+
 
 '''----------------------------------------------------CAMINO-----------------------------------------------------------------'''
 
