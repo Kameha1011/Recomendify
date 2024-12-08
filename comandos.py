@@ -145,7 +145,7 @@ def filtrar_page_rank_personalizado(page_rank, condicion, elemento, conjuntos):
     for clave in page_rank:
         if clave == elemento:
             continue
-        if conjuntos[clave] != condicion:
+        if conjuntos[clave] == condicion:
             page_rank_filtrado[clave] = page_rank[clave]
 
     return page_rank_filtrado
@@ -181,7 +181,7 @@ def recomendados(g, lista_canciones, n_recomendados, condicion, conjuntos):
     promediar_page_rank(pr_unificado, len(page_ranks_personalizados))
     pr_unificado_ordenado = ordenar_page_rank(pr_unificado)
 
-    recomendados = [elem for elem, _ in pr_unificado_ordenado[:n_recomendados + 1]]
+    recomendados = [elem for elem, _ in pr_unificado_ordenado[:n_recomendados]]
     printer(recomendados, SEPARADOR_ELEMENTOS)
 
 

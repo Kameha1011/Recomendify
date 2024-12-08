@@ -63,6 +63,7 @@ def obtener_grafo_proyeccion(g, conjunto):
     return grafo_proyeccion
 
 def printer(elementos, separador):
-    for i in range(len(elementos) - 2):
+    print (len(elementos))
+    for i in range(len(elementos) - 1):
             print(f" {elementos[i]}", end=separador)
     print(f" {elementos[-1]}")
