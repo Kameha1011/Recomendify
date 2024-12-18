@@ -74,14 +74,14 @@ def printer(elementos, separador):
     print(f" {elementos[-1]}")
 
 def top_k_recomendaciones(lista_page_rank, k):
-    invertida = []
+    lista_invertida = []
     for vertice, puntuacion in lista_page_rank:
-        invertida.append((-puntuacion, vertice))
+        lista_invertida.append((-puntuacion, vertice))
     
-    heapq.heapify(invertida)
+    heapq.heapify(lista_invertida)
     top_k_valores = []
     for _ in range(k):
-        _, vertice = heapq.heappop(invertida)
+        _, vertice = heapq.heappop(lista_invertida)
         top_k_valores.append(vertice)
     return top_k_valores
 

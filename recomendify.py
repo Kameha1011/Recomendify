@@ -4,7 +4,7 @@ import comandos
 import sys
 from auxiliares import construir_grafo_bipartito, obtener_grafo_proyeccion, obtener_comando
 
-
+MODO_APERTURA = "r"
 
 CAMINO = "camino"
 MAS_IMPORTANTES = "mas_importantes"
@@ -21,7 +21,7 @@ COMANDOS = {
 
 def main():
     grafo_proyeccion = None
-    archivo = open(sys.argv[1], "r")
+    archivo = open(sys.argv[1], MODO_APERTURA)
     grafo_bipartito, conjuntos = construir_grafo_bipartito(archivo)
     archivo.close()
 
