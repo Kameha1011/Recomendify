@@ -1,3 +1,4 @@
+import heapq
 from grafo import *
 
 ID_USUARIO = 1
@@ -10,10 +11,15 @@ SEPARADOR = " - "
 SEPARADOR_ELEMENTOS = ";"
 USUARIO = 0
 CANCION = 1
+ESPACIO = " "
+SEPARADOR_CANCIONES = " >>>> "
+TABULADOR = "\t"
+COMA = ","
+FIN_LINEA = "\n"
 
 def parsear_linea(linea : str):
-    datos = linea.rstrip("\n").split("\t")
-    generos = datos[GENEROS].split(",")
+    datos = linea.rstrip(FIN_LINEA).split(TABULADOR)
+    generos = datos[GENEROS].split(COMA)
     datos[GENEROS] = generos
     return datos
 
@@ -63,7 +69,46 @@ def obtener_grafo_proyeccion(g, conjunto):
     return grafo_proyeccion
 
 def printer(elementos, separador):
-    print (len(elementos))
     for i in range(len(elementos) - 1):
             print(f" {elementos[i]}", end=separador)
     print(f" {elementos[-1]}")
+
+def top_k_recomendaciones(lista_page_rank, k):
+    invertida = []
+    for vertice, puntuacion in lista_page_rank:
+        invertida.append((-puntuacion, vertice))
+    
+    heapq.heapify(invertida)
+    top_k_valores = []
+    for _ in range(k):
+        _, vertice = heapq.heappop(invertida)
+        top_k_valores.append(vertice)
+    return top_k_valores
+
+def parsear_linea_ciclo_rango(linea):
+    espacio = linea.find(ESPACIO)
+    n = int(linea[:espacio])
+    parametros = linea[espacio+1:]
+    return n, parametros
+
+def obtener_comando(linea):
+    linea = linea.rstrip(FIN_LINEA)
+    primer_espacio = linea.find(ESPACIO)
+    comando = linea[:primer_espacio]
+    linea = linea[primer_espacio+1:]
+    return comando, linea
+
+CANCIONES = "canciones"
+
+def parsear_linea_recomendacion(linea):
+    espacio = linea.find(ESPACIO)
+    tipo = linea[:espacio]
+    linea = linea[espacio+1:]
+    tipo_vertice = CANCION if tipo == CANCIONES else USUARIO
+
+    espacio = linea.find(ESPACIO)
+    n = int(linea[:espacio])
+    parametros = linea[espacio+1:]
+
+    lista_canciones = parametros.split(SEPARADOR_CANCIONES)
+    return tipo_vertice, n, lista_canciones

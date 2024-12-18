@@ -1,46 +1,53 @@
 from funciones_grafo import bfs, reconstruir_camino, encontrar_ciclo_largo_n, obtener_grados
 import random
-from auxiliares import printer
+from auxiliares import printer, top_k_recomendaciones, parsear_linea_ciclo_rango, parsear_linea_recomendacion
 
 SEPARADOR_ELEMENTOS = ";"
 CANCION = 1
+SEPARADOR_CANCIONES = " >>>> "
+ESPACIO = " "
+NO_CAMINO = "No se encontro recorrido"
+FLECHA = " -->"
 
 
 '''----------------------------------------------------CAMINO-----------------------------------------------------------------'''
 
-FLECHA = " --> "
+NO_SON_CANCIONES = "Tanto el origen como el destino deben ser canciones"
+APARECE = "aparece en playlist"
+DE = "de"
+TIENE = "tiene una playlist"
+DONDE = "donde aparece"
 
-def camino_minimo(g, inicio, fin, conjuntos):
+def camino_minimo(g, conjuntos, linea):
+    inicio, fin = linea.split(SEPARADOR_CANCIONES)
+    camino_minimo_wrapped(g, inicio, fin, conjuntos)
+
+def camino_minimo_wrapped(g, inicio, fin, conjuntos):
     if conjuntos[inicio] != CANCION or conjuntos[fin] != CANCION:
-        print("Tanto el origen como el destino deben ser canciones")
+        print(NO_SON_CANCIONES)
         return
 
     orden, padres = bfs(g, inicio, fin)
     if fin not in orden:
-        print("No se encontro recorrido")
+        print(NO_CAMINO)
         return
     printear_camino(g, reconstruir_camino(padres, inicio, fin))
     
 def printear_camino(g, camino):
+    sep = FLECHA + ESPACIO
     for i in range(len(camino) - 1):
-        playlist = g.peso_arista(camino[i], camino[i+1])
-        nombre_playlist = random.choice(list(playlist.values()))
+        playlists = g.peso_arista(camino[i], camino[i+1])
+        nombre_playlist = random.choice(list(playlists.values()))
         if i % 2 == 0:
-            print(f"{camino[i]}", end=FLECHA)
-            print("aparece en playlist", end=FLECHA)
-            print(f"{nombre_playlist}", end=FLECHA)
-            print("de", end=FLECHA)
-            print(f"{camino[i+1]}", end=FLECHA)
-            print("tiene una playlist", end=FLECHA)
+            print(f"{camino[i]}{sep}{APARECE}{sep}{nombre_playlist}{sep}{DE}{sep}{camino[i+1]}{sep}{TIENE}", end=sep)
         else:
-            print(f"{nombre_playlist}", end=FLECHA)
-            print(f"donde aparece", end=FLECHA)
+            print(f"{nombre_playlist}{sep}{DONDE}", end=sep)
     
     print(camino[-1])
 
 '''------------------------------------------------Mas Importantes----------------------------------------------------'''
 
-page_rank = {}
+PAGE_RANK = {}
 CANTIDAD_ITERACIONES = 100
 FACTOR_AMORTIGUACION = 0.85
 
@@ -71,22 +78,24 @@ def filtro_mas_importantes(diccionario, conjuntos):
             nuevo[clave] = diccionario[clave]
     return nuevo
 
-def mas_importantes(n, g, conjuntos):
-    global page_rank
-    if len(page_rank) == 0:
-        page_rank = pagerank(g)
-        page_rank = filtro_mas_importantes(page_rank, conjuntos)
-        page_rank = list(page_rank.items())
-        page_rank.sort(key=lambda x: x[1], reverse=True)
+def mas_importantes_wrapped(n, g, conjuntos):
+    global PAGE_RANK
+    if len(PAGE_RANK) == 0:
+        PAGE_RANK = pagerank(g)
+        PAGE_RANK = filtro_mas_importantes(PAGE_RANK, conjuntos)
+        PAGE_RANK = list(PAGE_RANK.items())
+        PAGE_RANK.sort(key=lambda x: x[1], reverse=True)
 
-    canciones_mas_importantes = [cancion for cancion, _ in page_rank[:n+1]]
+    canciones_mas_importantes = [cancion for cancion, _ in PAGE_RANK[:n+1]]
 
     printer(canciones_mas_importantes, SEPARADOR_ELEMENTOS)
-    
+
+def mas_importantes(g, conjuntos, linea):
+    n = int(linea)
+    mas_importantes_wrapped(n, g, conjuntos)
 
 '''----------------------------------------------------Rango----------------------------------------------------'''
-
-def rango(g,n, inicio):
+def rango_wrapped(g,n, inicio):
     orden, _ = bfs(g, inicio, corte=n)
     cont = 0
     for v in orden:
@@ -94,16 +103,22 @@ def rango(g,n, inicio):
             cont += 1
     print(cont)
 
+def rango(g, linea):
+    n, parametros = parsear_linea_ciclo_rango(linea)
+    rango_wrapped(g, n, parametros)
+
 '''----------------------------------------------------Ciclos---------------------------------------------------------'''
 
-
-def ciclo_n_canciones(grafo, n, cancion_origen):
+def ciclo_n_canciones_wrapped(grafo, n, cancion_origen):
     ciclo = encontrar_ciclo_largo_n(grafo, cancion_origen, n)
     if not ciclo:
-        print("No se encontro recorrido")
+        print(NO_CAMINO)
         return
     printer(ciclo, FLECHA)
 
+def ciclo_n_canciones(g, linea):
+    n, parametros = parsear_linea_ciclo_rango(linea)
+    ciclo_n_canciones_wrapped(g, n, parametros)
 
 '''----------------------------------------------------Page Rank Personalizado----------------------------------------------'''
 
@@ -160,16 +175,12 @@ def unificar_page_ranks(page_ranks):
                 page_rank_unificado[clave] = pr[clave]
     return page_rank_unificado
 
-def ordenar_page_rank(page_rank):
-    page_rank = list(page_rank.items())
-    page_rank.sort(key=lambda x: x[PESO], reverse=True)
-    return page_rank
 
 def promediar_page_rank(page_rank, factor):
     for clave in page_rank:
         page_rank[clave] /= factor
 
-def recomendados(g, lista_canciones, n_recomendados, condicion, conjuntos):
+def recomendados_wrapper(g, lista_canciones, n_recomendados, condicion, conjuntos):
     grados = obtener_grados(g)
     page_ranks_personalizados = []
     for cancion in lista_canciones:
@@ -179,10 +190,13 @@ def recomendados(g, lista_canciones, n_recomendados, condicion, conjuntos):
     
     pr_unificado = unificar_page_ranks(page_ranks_personalizados)
     promediar_page_rank(pr_unificado, len(page_ranks_personalizados))
-    pr_unificado_ordenado = ordenar_page_rank(pr_unificado)
-
-    recomendados = [elem for elem, _ in pr_unificado_ordenado[:n_recomendados]]
+    
+    recomendados = top_k_recomendaciones(list(pr_unificado.items()), n_recomendados)
     printer(recomendados, SEPARADOR_ELEMENTOS)
+
+def recomendados(g, conjuntos, linea):
+    tipo_vertice, n, lista_canciones = parsear_linea_recomendacion(linea)
+    recomendados_wrapper(g, lista_canciones, n, tipo_vertice, conjuntos)
 
 
 '''---------------------------------------------------------------------------------------------------'''
